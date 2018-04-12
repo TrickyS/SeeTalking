@@ -1,0 +1,8 @@
+<resources>
+
+    <style name="TrainingTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <!-- Customize your theme here. -->
+            <item name="windowNoTitle">true</item>
+    </style>
+
+</resources>
