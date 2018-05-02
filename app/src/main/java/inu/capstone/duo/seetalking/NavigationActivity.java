@@ -13,6 +13,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import java.util.HashMap;
 import java.util.Map;
 
+import inu.capstone.duo.seetalking.Fragment.AccountFragment;
 import inu.capstone.duo.seetalking.Fragment.ChatFragment;
 import inu.capstone.duo.seetalking.Fragment.PeopleFragment;
 
@@ -33,6 +34,9 @@ public class NavigationActivity extends AppCompatActivity {
                         return true;
                     case R.id.action_chat:
                         getFragmentManager().beginTransaction().replace(R.id.layout_frame_navi, new ChatFragment()).commit();
+                        return true;
+                    case R.id.action_account:
+                        getFragmentManager().beginTransaction().replace(R.id.layout_frame_navi, new AccountFragment()).commit();
                         return true;
                 }
                 return false;

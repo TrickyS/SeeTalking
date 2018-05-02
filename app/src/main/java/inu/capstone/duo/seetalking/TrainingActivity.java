@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -13,33 +14,54 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.naver.speech.clientapi.SpeechRecognitionResult;
+
+import org.json.JSONObject;
+
+import inu.capstone.duo.seetalking.Retrofit.PostData;
+import inu.capstone.duo.seetalking.Retrofit.RetrofitConnect;
+import inu.capstone.duo.seetalking.Retrofit.RetrofitInterface;
 import inu.capstone.duo.seetalking.util.AudioWriterPCM;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class TrainingActivity extends Activity {
 
+    // 음성인식
     private static final String TAG = TrainingActivity.class.getSimpleName();
     private static final String CLIENT_ID = KeyClass.CLIENT_ID;
-
     private TrainingActivity.RecognitionHandler handler;
     private NaverRecognizer naverRecognizer;
+    private AudioWriterPCM writer;
+
+    // Retrofit
+    private RetrofitInterface retrofitInterface;
+    // 테스트
+    private Button btn_test;
 
     // 결과물, 버튼
     private String mResult;
     private TextView txtResult;
     private Button btn_record;
     private Button btn_camera;
-
+    private EditText input_text;
     private SurfaceView surfaceView;
     private SurfaceHolder surfaceHolder;
     private Camera camera;
     private static int count = 0; // 변환용
-
-    private AudioWriterPCM writer;
 
     // 2. 그다음 시작하는게 onCreate. Activity 생성시 잴 먼저 실행된다.
     @Override
@@ -49,19 +71,33 @@ public class TrainingActivity extends Activity {
         setContentView(R.layout.activity_training);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); // 전체화면
 
+        // 음성인식
         handler = new TrainingActivity.RecognitionHandler(this);
         naverRecognizer = new NaverRecognizer(this, handler, CLIENT_ID);
+
+        // Retrofit 초기화
+        retrofitInterface = RetrofitConnect.getInstance();
 
         txtResult = (TextView) findViewById(R.id.txt_result);
         btn_record = (Button) findViewById(R.id.btn_record);
         btn_camera = (Button) findViewById(R.id.btn_camera);
-        surfaceView =  (SurfaceView) findViewById(R.id.surfaceView1);
+        input_text = (EditText) findViewById(R.id.input_text);
 
+        surfaceView =  (SurfaceView) findViewById(R.id.surfaceView1);
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(surfaceListener);
-        //surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        findViewById(R.id.btn_camera).setOnClickListener(new Button.OnClickListener() {
+        // Retrofit 값 보내기 테스트
+        btn_test = (Button)findViewById(R.id.btn_test);
+
+        btn_test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Connection2();
+            }
+        });
+
+       btn_camera.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
                 count++;
@@ -148,6 +184,55 @@ public class TrainingActivity extends Activity {
         super.onStop();
         // NOTE : release() must be called on stop time.
         naverRecognizer.getSpeechRecognizer().release();
+    }
+
+    // 테스트용
+    /*public void Connection(){
+        Call<JsonArray> getDataCall = retrofitInterface.getData();
+
+        getDataCall.enqueue(new Callback<JsonArray>() {
+            @Override
+            public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
+                if(response.isSuccessful()) { // 성공
+                    JsonParser jsonParser = new JsonParser();
+                    JsonArray jsonData = (JsonArray) jsonParser.parse(response.body().toString());
+                    String resultData = jsonData.toString();
+                    txtResult.setText(resultData);
+                    Log.i("what the", "왜???");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonArray> call, Throwable t) {
+                Log.i("failed", "Why?!!?!");
+            }
+        });
+    }*/
+
+    public void Connection2(){
+        PostData postData = new PostData("hello", "world!");
+        Call<PostData> postDataCall = retrofitInterface.postData(postData);
+        postDataCall.enqueue(new Callback<PostData>() {
+            @Override
+            public void onResponse(Call<PostData> call, Response<PostData> response) {
+                if(response.isSuccessful()) {
+                    Gson gson = new Gson();
+                    PostData receiveData = response.body();
+                    String randtoken = receiveData.getRandtoken();
+                    Toast.makeText(getApplicationContext(), "response code : " + response.code() + randtoken, Toast.LENGTH_LONG).show();
+                    Log.i("result", randtoken);
+                }
+                else{
+                    Toast.makeText(getApplicationContext(), "response code : " + response.code(), Toast.LENGTH_LONG).show();
+                    Log.i("post", "failed");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PostData> call, Throwable t) {
+                Log.i("failed", "Why?!!?!");
+            }
+        });
     }
 
     // Declare handler for handling SpeechRecognizer thread's Messages.

@@ -1,8 +1,6 @@
 package inu.capstone.duo.seetalking.Retrofit;
 
 import inu.capstone.duo.seetalking.KeyClass;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -13,15 +11,19 @@ public class RetrofitConnect {
     private static Retrofit retrofit = null;
     private static RetrofitInterface retrofitInterface = null;
 
-    static Retrofit getClient(){
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-
+    private RetrofitConnect(){
         retrofit = new Retrofit.Builder()
                 .baseUrl(KeyClass.SERVER_IP)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        return retrofit;
+        retrofitInterface = (RetrofitInterface)retrofit.create(RetrofitInterface.class);
+    }
+
+    public static RetrofitInterface getInstance(){
+        if (instance == null){
+            instance = new RetrofitConnect();
+        }
+        RetrofitConnect localRetrofitClass = instance;
+        return  retrofitInterface;
     }
 }

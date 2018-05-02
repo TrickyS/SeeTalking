@@ -32,7 +32,7 @@
     <string name="sign_out">로그아웃</string>
     <string name="invite_menu_label">Invite</string>
     <string name="sign_in">로그인</string>
-    <string name="google_login">SeeTalking을 이용하기 위해서는\n구글 로그인이 필요합니다.</string>
+    <string name="google_login">구글 로그인이 필요합니다.</string>
     <string name="sign_up">Sign Up</string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="title_activity_settings">Settings</string>

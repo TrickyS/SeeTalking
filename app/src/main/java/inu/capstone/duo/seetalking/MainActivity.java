@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
@@ -95,7 +97,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
        // 퍼미션 체크
         if (hasPermissions()) {
-            Toast.makeText(getApplicationContext(), "권한 승인", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "권한 승인", Toast.LENGTH_SHORT).show();
         } else {
             requestPerms();
         }
@@ -103,16 +105,16 @@ public class MainActivity extends Activity {
         mAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mAuth.getCurrentUser(); // 로그인 확인
 
-        if(mFirebaseUser == null) { // 로그인이 되어있지 않으면 로그인 화면으로
-           startActivity(new Intent(this, LoginActivity.class));
-           finish();
+        if(mFirebaseUser == null || GoogleSignIn.getLastSignedInAccount(this) == null) { // 로그인이 되어있지 않으면 로그인 화면으로
+            startActivity(new Intent(this, LoginActivity.class));
+            //finish();
         } else { // 로그인 되어 있으면 프로필 저장하기 이걸 좀 더 최적화하고 싶은데...
             userModel = new UserModel();
             userModel.userName = mFirebaseUser.getDisplayName();
             userModel.profileImageUrl = mFirebaseUser.getPhotoUrl().toString();
             userModel.uid = mFirebaseUser.getUid();
-
             FirebaseDatabase.getInstance().getReference().child("users").child(userModel.uid).setValue(userModel);
+            Toast.makeText(this, "hello! " + userModel.userName, Toast.LENGTH_SHORT).show();
         }
 
         btService=null;
@@ -183,12 +185,9 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                FirebaseAuth.getInstance().signOut(); // 로그아웃
-                mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser(); // 로그인 확인
-                if(mFirebaseUser == null) { // 로그인이 되어있지 않으면 로그인 화면으로
-                    startActivity(intent);
-                    finish();
-                }
+                FirebaseAuth.getInstance().signOut(); // Firebase 로그아웃
+                startActivity(intent);
+                finish();
             }
         });
 
@@ -198,6 +197,12 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        if(GoogleSignIn.getLastSignedInAccount(this) == null){
+            Log.i("BYEBYE", "이거시 null이어서 문제였구만?");
+        } else{
+            Log.i("Really?", "에엑따");
+        }
 
         //Bluetooth Activate check and ready
         if(btService==null){
@@ -353,13 +358,13 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        btService.stop();
         if(isService)
         {
             unbindService(mConnection);
             isService=false;
             Log.d(TAG,"Service is closed");
         }
+        btService.stop();
     }
 
 
