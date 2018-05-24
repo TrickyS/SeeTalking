@@ -13,7 +13,7 @@ public class RetrofitConnect {
 
     private RetrofitConnect(){
         retrofit = new Retrofit.Builder()
-                .baseUrl(KeyClass.SERVER_IP)
+                .baseUrl(KeyClass.LANG_API) // 형태소분석 API
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         retrofitInterface = (RetrofitInterface)retrofit.create(RetrofitInterface.class);

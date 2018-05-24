@@ -213,7 +213,7 @@ public class TalkActivity extends AppCompatActivity {
 
         Request request = new Request.Builder()
                 .header("Content-Type", "application/json")
-                .addHeader("Authorization","key=AIzaSyA8s9zOVtnqgkNS3E0sWgDaA_rWcJdt7H4") // Firebase - 프로젝트 설정 - 클라우드 메시징 - 이전 서버키
+                .addHeader("Authorization", KeyClass.PUSH_KEY) // Firebase - 프로젝트 설정 - 클라우드 메시징 - 이전 서버키
                 .url("https://gcm-http.googleapis.com/gcm/send")
                 .post(requestBody)
                 .build();
@@ -222,12 +222,10 @@ public class TalkActivity extends AppCompatActivity {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
             }
         });
     }
@@ -249,7 +247,6 @@ public class TalkActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
     }
@@ -360,8 +357,6 @@ public class TalkActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
-
         finish();
         overridePendingTransition(R.anim.fromleft,R.anim.toright);
     }
@@ -411,10 +406,9 @@ public class TalkActivity extends AppCompatActivity {
                 SpeechRecognitionResult speechRecognitionResult = (SpeechRecognitionResult) msg.obj;
                 List<String> results = speechRecognitionResult.getResults();
                 StringBuilder strBuf = new StringBuilder();
-                // 결과 중에서 한 줄만 따는 법을 나는 모르겠다 하하하하하하
+                // 결과 중에서 첫번째 결과만
                 for(String result : results) {
                     strBuf.append(result);
-                    //strBuf.append("\n");
                     break;
                 }
                mResult = strBuf.toString();
